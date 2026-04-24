@@ -1,0 +1,20 @@
+[project]
+name = "bad-apple-django-bolt"
+version = "0.1.0"
+description = "Add your description here"
+readme = "README.md"
+requires-python = ">=3.13"
+dependencies = [
+    "datastar-py>=1.0.0",
+    "django-bolt",
+    "nanodjango>=0.16.0",
+]
+
+[dependency-groups]
+dev = [
+    "yt-dlp>=2026.3.17",
+]
+
+# remove this once out of development stage
+[tool.uv.sources]
+django-bolt = { path = "../django-bolt" }

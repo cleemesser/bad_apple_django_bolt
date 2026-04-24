@@ -92,9 +92,9 @@ index_html = """
 </head>
 <body data-signals:playing="false">
     <div id="ascii-display"><div id="ascii-inner"></div></div>
-    <button id="play-button" data-on:click="player=document.getElementById('audio-player'); $playing=true; player.play(); @get('/play')" data-show="!$playing">Play</button>
+    <button id="play-button" data-on:click="player=document.getElementById('audio-player'); $playing=true; startPlayer(); @get('/play')" data-show="!$playing">Play</button>
 
-    <audio id="audio-player" >
+    <audio id="audio-player" preload="auto">
         <source src="static/bad_apple.mp3" type="audio/mp3">
         Your browser does not support the audio element.
     </audio>
@@ -151,13 +151,9 @@ document.addEventListener('DOMContentLoaded', () => {
   initializeAnimation();
 })
 
-function startAnimation() {
+async function startPlayer() {
    const audioPlayer = document.getElementById('audio-player');
-   setTimeout( () => {
-      audioPlayer.play();  // Play the audio after the delay
-      // playAnimation();  // Start the animation after the same delay
-   }, 250);  // Delay both for sync
-
+   await audioPlayer.play(); // thought is this only returns once playing start
 }
 </script>
 </body>

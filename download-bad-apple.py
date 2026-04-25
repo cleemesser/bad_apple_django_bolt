@@ -1,5 +1,7 @@
 import yt_dlp
 
+global download_name
+
 def download_video(url):
     ydl_opts = {
         'format': 'best',  # Downloads the best available quality

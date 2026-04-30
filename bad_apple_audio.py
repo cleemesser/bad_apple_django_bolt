@@ -19,6 +19,7 @@ import tomllib
 # %%
 from nanodjango import Django
 from django_bolt.nanodjango import BoltAPI
+
 # %% standard django/django-bolt below this
 from django_bolt.responses import StreamingResponse
 from django_bolt.middleware import no_compress
@@ -47,11 +48,11 @@ _hdr = tomllib.load(open(HDR_FILE, "rb"))
 # %%
 # N_ROWS = _hdr["n_rows"]
 N_COLUMNS = _hdr["columns"]  # visible columns, excluding newline
-_N_COLS_WITH_NL = _hdr["columns"] +1
-N_FRAMES = _hdr["frames"] # this needs to be added to details.toml
-FRAME_SIZE = _hdr['frame_size']
+_N_COLS_WITH_NL = _hdr["columns"] + 1
+N_FRAMES = _hdr["frames"]  # this needs to be added to details.toml
+FRAME_SIZE = _hdr["frame_size"]
 N_ROWS = FRAME_SIZE // _N_COLS_WITH_NL
-FPS = _hdr['fps']
+FPS = _hdr["fps"]
 # assert N_ROWS * _N_COLS_WITH_NL == FRAME_SIZE
 # %%
 # mmap keeps the 77MB of frame data off the heap — the OS pages it in as
@@ -61,9 +62,11 @@ _frame_mm = mmap.mmap(_frame_fp.fileno(), 0, access=mmap.ACCESS_READ)
 
 DELAY = 1.0 / FPS  # 60 fps
 
+
 @app.route("/")
 def index(request):
-    return HttpResponse("""
+    return HttpResponse(
+        """
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -172,9 +175,9 @@ function initializeAnimation() {
 }
 </script>
 </body>
-    </html>""" % {'N_ROWS':N_ROWS, 'N_COLUMNS': N_COLUMNS} ) # need to double % to escape
-
-
+    </html>"""
+        % {"N_ROWS": N_ROWS, "N_COLUMNS": N_COLUMNS}
+    )  # need to double % to escape
 
 
 # want to push a new ascii frame as SSE every 1/30 second
@@ -187,7 +190,7 @@ async def play(request):
         start = loop.time()
         for ii in range(N_FRAMES):
             offset = ii * FRAME_SIZE
-            frame = _frame_mm[offset:offset + FRAME_SIZE].decode('ascii')
+            frame = _frame_mm[offset : offset + FRAME_SIZE].decode("ascii")
             yield SSE.patch_elements(f"""<div id="ascii-inner">{escape(frame)}</div>""")
             next_time = start + (ii + 1) * DELAY
             sleep_dur = next_time - loop.time()
@@ -198,16 +201,18 @@ async def play(request):
         generate_frames(),
         media_type="text/event-stream",
         headers={"Cache-Control": "no-cache", "X-Accel-Buffering": "no"},
+        compress="br",  # use the default brotli config
     )
 
 
 bolt.mount_django("/")  # have django-bolt serve the django app as asgi
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     # needs to be imported after other things are configured
     # (single-file django app style)
-    import sys # noqa: E402
+    import sys  # noqa: E402
     from django.core.management import (  # noqa: E402
         execute_from_command_line,
     )
+
     execute_from_command_line(sys.argv)
